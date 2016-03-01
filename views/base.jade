@@ -1,0 +1,57 @@
+block vars
+doctype html
+html
+    head
+        title AlbumMaker | #{title}
+        link(rel='stylesheet', href='/css/image_style.css', type='text/css')
+        link(rel='stylesheet', href='/css/style.css', type='text/css')
+        link(rel='stylesheet', href='/css/table.css', type='text/css')
+        link(rel='stylesheet', href='/css/nav.css', type='text/css')
+        link(rel='stylesheet', href='/css/paging.css', type='text/css')
+
+        // Add jQuery library
+        script(type='text/javascript', src='http://code.jquery.com/jquery-latest.min.js')
+        // Add mousewheel plugin (this is optional)
+        script(type='text/javascript', src='/fancybox/lib/jquery.mousewheel-3.0.6.pack.js')
+        // Add fancyBox
+        link(rel='stylesheet', href='/fancybox/source/jquery.fancybox.css?v=2.1.5', type='text/css', media='screen')
+        script(type='text/javascript', src='/fancybox/source/jquery.fancybox.pack.js?v=2.1.5')
+
+        script.
+            $(document).ready(function () {
+                $(".fancybox").fancybox({
+                    'titleShow' : false,
+                    'type': 'iframe',
+                    'autoSize':false,
+                    'width': 420,
+                    'height': 520
+                });
+            });
+
+    body
+        #nav
+            #nav_wrapper
+                ul
+                    li
+                        a(href='/dashboard') Home
+                    li
+                        a(href='#') About
+                    li
+                        a(href='#') Social Media
+                        ul
+                            li
+                                a(href='#') Facebook
+                            li
+                                a(href='#') Twitter
+                            li
+                                a(href='#') Google+
+
+                    li
+                        a(href="#") Contact
+                    -if (bShowLogout)
+                        li(style="float:right")
+                            a(href="/logout", id="logout_id") Logout
+
+            // Nav wrapper end
+        // Nav end
+        block body

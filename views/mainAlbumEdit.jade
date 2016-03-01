@@ -1,0 +1,113 @@
+extends base
+block vars
+    - var title = 'Edit Album'
+    - var bShowLogout=true
+
+block body
+    script.
+        function delete_photo(idx,albumName)
+        {
+            var goAhead= confirm("Are you sure?");
+            if (goAhead)
+            {
+                var object_array = $("#object_id_array").val().split(",");
+                var objectID = object_array[idx];
+                $.ajax({
+                    type: 'POST',
+                    url: '/mainAlbum/delete/photo/',
+                    data: {'object_id': objectID},
+                    success: function (data, textStatus) {
+                        var json_callback = JSON.parse(data);
+                        //console.log(json_callback);
+                        f_handle_callback(json_callback.code, albumName, data,bDashboard=false);
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log('Request failed');
+
+                    }
+                });
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        function delete_album(albumName)
+        {
+            var goAhead = confirm("Are you sure?");
+            if (goAhead)
+            {
+                $.ajax({
+                    type: 'POST',
+                    url: '/mainAlbum/delete/album/',
+                    data: {'albumName': albumName},
+                    success: function (data, textStatus) {
+                        var json_callback = JSON.parse(data);
+                        //console.log(json_callback);
+                        f_handle_callback(json_callback.code, albumName, data, bDashboard = true);
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.log('Request failed');
+                    }
+                });
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        function f_handle_callback(code,albumName,data, bDashboard) {
+            //Added new photo
+            if (code == 0)
+            {
+                if (bDashboard)
+                {
+                    //Reload the page
+                    var url = "/dashboard";
+                }
+                else
+                {
+                    //Reload the page
+                    var url = "/mainAlbum/edit/" + albumName;
+                }
+                window.location.href = url;
+            }
+            //Other Errors
+            else
+            {
+                alert("Failed. Please try again");
+                console.log(data.result);
+            }
+        }
+        $(document).ready(function () {
+
+        });
+
+        $(document).ajaxSend(function (elm, xhr, s) {
+            if (s.type == "POST") {
+                xhr.setRequestHeader('x-csrf-token', $('#csrf-token').val());
+            }
+        });
+
+    h1 Edit Album: #{albumName}
+    br
+    br
+    button(id="del_album" style="width:200px;text-align:center;" onclick="delete_album('#{albumName}');") Delete Album
+
+    body.no-touch
+        <input type="hidden" id="csrf-token" value= "#{csrfToken}">
+        <input type="hidden" id="object_id_array", value= "#{object_id_url}">
+        .wrap
+        -var idx=0
+        each rV in image_url_db
+            .box
+                .boxInner
+                    img(src="#{rV}")
+                    .titleBox
+                        button.popup_button(id="del_photos_#{idx}" onclick="return delete_photo('#{idx++}','#{albumName}');") Delete Photo
+
+

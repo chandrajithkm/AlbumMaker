@@ -1,0 +1,21 @@
+extends base
+
+block vars
+    - var title = 'Login'
+
+block body
+    h1 Welcome to AlbumMaker
+    .login-page
+        .form
+            form.login-form(method="post")
+                h1 Login to your account
+                input(type="hidden", name="_csrf", value=csrfToken)
+                input(type="text", name="email", placeholder="Email" required=true)
+                input(type="password", name="password", required=true placeholder="Password")
+                if error
+                    .display_error
+                        b ERROR: #{error}
+                input(type="submit", value="Login")
+                p.message
+                    | Not registered? &nbsp;
+                    a(href='/register') Create an account

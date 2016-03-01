@@ -1,0 +1,42 @@
+doctype html
+html
+    head
+    link(rel='stylesheet', href='/css/style.css', type='text/css')
+    link(rel='stylesheet', href='/css/table.css', type='text/css')
+block body
+    script.
+        /*function check_input()
+        {
+            var CSRF_TOKEN = $('#token').val();
+            alert(CSRF_TOKEN);
+            //validate and if successful, then call ajax
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:3000/MongoRequest'
+            });
+        }*/
+        function closeFancyboxAndRedirectToUrl(url)
+        {
+            top.$.fancybox.close();
+            self.parent.location.href = url;
+        }
+
+    if (success == 1)
+        p.
+            Success
+
+        script.
+            var url =!{JSON.stringify(rd_url)};
+            var album_name =!{JSON.stringify(album_name)};
+            url = url +'/'+album_name;
+            closeFancyboxAndRedirectToUrl(url);
+    else
+        h1 Create New Album
+        .login-page
+            .form
+                form.register-form-form(method="post",action="/CreateAlbumRequest")
+                    input(type="hidden", name="_csrf", value=csrfToken)
+                    input(type='text', name='album_name' placeholder="Album Name" style="text-align:center" required=true)
+                    input(type='submit',id="create" value='Create')
+                    button(onclick='top.$.fancybox.close();') Cancel
+

@@ -1,0 +1,31 @@
+extends base
+
+block vars
+    - var title = 'Dashboard'
+    - var bShowLogout=true
+
+block body
+    script.
+        $body = $("body");
+
+        $(document).on({
+        ajaxStart: function() { $body.addClass("loading");    },
+            ajaxStop: function() { $body.removeClass("loading"); }
+        });
+    h1 Welcome to Dashboard
+    br
+    button(name='create_album' style="width:200px;text-align:center;" class="fancybox" href="/createAlbum" ) Create New Album
+    -if (rAlbums.length > 0)
+        br
+        br
+        table#mytable
+            tr
+                th Album Name
+                th(style="text-align:center;" colspan="2") Action
+            each rV in rAlbums
+                tr
+                    th #{rV}
+                    th(style="text-align:center")
+                        a(href="/mainAlbum/#{rV}") Add Photos
+                    th(style="text-align:center")
+                        a(href="/mainAlbum/edit/#{rV}") Edit Album

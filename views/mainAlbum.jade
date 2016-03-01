@@ -1,0 +1,176 @@
+extends base
+block vars
+    - var title = 'Create Album'
+    - var bShowLogout=true
+
+block body
+
+    script.
+        function f_change_page(page_idx,albumName,tags,search_by)
+        {
+            /*$.ajax({
+                type : 'POST',
+                url : '/mainAlbum/:albumName/'+page_idx,
+                data :{page_number:page_idx,albumName:albumName,search_text:tags,search_by:search_by},
+                success: function(data)
+                {
+                    console.log(data);
+                    window.location.href = data;
+                },
+                error:function(xhr, textStatus, errorThrown) {
+
+                }
+            });*/
+            //console.log(page_idx);
+            //console.log(tags);
+            //console.log(search_by);
+
+            var real_search_text = $("#search_text").val();
+            if (real_search_text == "")
+            {
+                alert("Please enter some tags/location");
+                return false;
+            }
+            console.log(real_search_text);
+
+            $("#search_form").attr("action", "/mainAlbum/"+albumName+'/'+page_idx);
+            var input1 = $("<input>").attr("type","hidden").attr("name", "albumName").val(albumName);
+            var input2 = $("<input>").attr("type","hidden").attr("name", "search_text").val(tags);
+            var input3 = $("<input>").attr("type","hidden").attr("name", "search_by").val(search_by);
+            var input4 = $("<input>").attr("type","hidden").attr("name", "page_number").val(page_idx);
+
+            $("#search_form").append(input1);
+            $("#search_form").append(input2);
+            $("#search_form").append(input3);
+            $("#search_form").append(input4);
+
+            $('#search_form').submit();
+            return true;
+        }
+
+        function f_addPhotos(photo_link, albumName, photo_idx) {
+            $.ajax({
+                type: 'POST',
+                url: '/addPhotos',
+                data: {'photo_link': photo_link, 'albumName': albumName},
+                success: function (data, textStatus) {
+                    var json_callback = JSON.parse(data);
+                    f_handle_callback(json_callback.code, photo_idx);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log('Request failed');
+                }
+            });
+        }
+
+        function f_handle_callback(code, photo_idx) {
+            //Added new photo
+            if (code == 0) {
+                $("#photos_" + photo_idx).hide();
+                $("#added_" + photo_idx).show()
+            }
+            //Photo Already exists
+            else if (code == 1) {
+                $("#added_" + photo_idx).show()
+            }
+            //Other Errors
+            else {
+
+            }
+        }
+
+        function f_search_flickr(albumName)
+        {
+            var search_text = $("#search_text").val();
+
+            //This method could also be extended to check for valid hashtags
+            if (search_text == '')
+            {
+                alert("Please enter some tags/location");
+                return false;
+            }
+            return true;
+        }
+
+        $(document).ready(function () {
+
+            $("#search_by").change(function(){
+               //Whenever change, clear the search bar
+                $("#search_text").val('');
+            });
+
+        });
+
+        $(document).ajaxSend(function (elm, xhr, s) {
+            if (s.type == "POST") {
+                xhr.setRequestHeader('x-csrf-token', $('#csrf-token').val());
+            }
+        });
+
+    h1 Add Photos to "#{albumName}"
+    .album-page
+        .form
+            form(method="post" id="search_form" action="/mainAlbum/#{albumName}")
+                input(type="hidden", name="_csrf", id="_token" value=csrfToken)
+                input(type="hidden" name="albumName" value="#{albumName}")
+                div SEARCH BY:
+                br
+                select(id="search_by" name="search_by")
+                    -if (search_by_old == "search_by_tags" || !search_by_old)
+                        option(value="search_by_tags" selected="selected") Tags
+                        option(value="search_by_location") Location
+                    -else
+                        option(value="search_by_tags") Tags
+                        option(value="search_by_location" selected="selected") Location
+
+                -if (typeof(tags) !== "undefined")
+                    input(type='text', id='search_text', placeholder="Tags, Location" name="search_text" value="#{tags}")
+                -else
+                    input(type='text', id='search_text', placeholder="Tags, Location" name="search_text" value="")
+                p.small_text "Eg: Location: San Jose, Tags: dog,cat,lion"
+                input(type='submit' id="search_button" value="Search" onclick="return f_search_flickr('#{albumName}');")
+
+    -if (total_length == 0)
+        h1 No Match Found
+
+    -else
+        -if (typeof(tags) !== "undefined" && search_by_old == "search_by_tags")
+            h1 Photos by Tags
+        -else if (typeof(tags) !== "undefined" && search_by_old == "search_by_location")
+            h1 Photos by Location
+        -else
+            h1 Popular Photos
+
+
+    body.no-touch
+        <input type="hidden" id="csrf-token" value= "#{csrfToken}">
+        .wrap
+        -var idx=0
+        each rV in image_url
+            .box
+                .boxInner
+                    img(src="#{rV}")
+                    .titleBox
+                        -if (image_url_db.indexOf(rV) != -1)
+                            button.popup_button Already Added
+                        -else
+                            button.popup_button(href="#", id="photos_#{idx}" onclick="f_addPhotos('#{rV}','#{albumName}','#{idx}' );") Add to Album: #{albumName}
+                            button.popup_button(id="added_#{idx++}" style="display:none") Already Added
+
+        br
+        br
+
+        div(style="text-align:center;")
+            -var n=1
+            ul.pagination
+                while n <= page_max
+                    li
+                        // if search is being done by tags/location
+                        -if (typeof(tags) !== "undefined" && current_page == n)
+                            a.active(onclick= "return f_change_page('#{n}','#{albumName}','#{tags}','#{search_by_old}');") #{n++}
+                        -else if (typeof(tags) !== "undefined" && current_page != n)
+                            a(href="#" onclick= "return f_change_page('#{n}','#{albumName}','#{tags}','#{search_by_old}');") #{n++}
+                        -else if (typeof(tags) === "undefined" && current_page == n)
+                            a.active(href="/mainAlbum/#{albumName}/#{n}") #{n++}
+                        -else if (typeof(tags) === "undefined" && current_page != n)
+                            a(href="/mainAlbum/#{albumName}/#{n}") #{n++}

@@ -1,0 +1,16 @@
+//Display Error
+doctype html
+html
+    head
+    link(rel='stylesheet', href='/css/style.css', type='text/css')
+    link(rel='stylesheet', href='/css/table.css', type='text/css')
+block body
+    h1 Error
+
+    if error
+        .display_error(style="text-align:center;")
+            b ERROR: #{error}
+
+    if (errno == 1)
+        h1.
+            &nbsp;&nbsp;<a href="/createAlbum">Go back</a>

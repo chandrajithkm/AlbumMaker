@@ -1,0 +1,20 @@
+extends base
+
+block vars
+    - var title = 'Home'
+
+block body
+
+    script.
+        function f_go_next(param)
+        {
+            var url = "/"+param;
+            window.location.href = url;
+        }
+    h1 Welcome to AlbumMaker!
+    br
+    br
+    button(onclick="f_go_next('login');" style="width:200px;text-align:center;") Login
+    br
+    br
+    button(onclick="f_go_next('register');" style="width:200px;text-align:center;") Register
